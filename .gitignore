@@ -4,7 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
-
+reactnd-contacts-app
+reactnd-contacts-server2
 # testing
 /coverage
 
