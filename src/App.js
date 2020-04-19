@@ -1,30 +1,48 @@
 import React, { Component } from 'react';
 import ListContacts from './ListContacts';
-const contacts = [
-    {
-        id: 'karen',
-        name: 'Karen Isgrigg',
-        handle: 'karen_isgrigg',
-        avatarURL: 'http://localhost:5001/karen.jpg',
-    },
-    {
-        id: 'richard',
-        name: 'Richard Kalehoff',
-        handle: 'richardkalehoff',
-        avatarURL: 'http://localhost:5001/richard.jpg',
-    },
-    {
-        id: 'tyler',
-        name: 'Tyler McGinnis',
-        handle: 'tylermcginnis',
-        avatarURL: 'http://localhost:5001/tyler.jpg',
-    },
-];
+import * as ContactsAPI from './utils/ContactsAPI';
+import CreateContact from './CreateContact';
+import { Route } from 'react-router-dom';
 class App extends Component {
+    state = {
+        contacts: [],
+    };
+    componentDidMount() {
+        ContactsAPI.getAll().then((contacts) => this.setState({ contacts: contacts }));
+    }
+    removeContact = (contact) => {
+        this.setState((currentState) => ({
+            contacts: currentState.contacts.filter((c) => contact.id !== c.id),
+        }));
+        ContactsAPI.remove(contact);
+    };
+    CreateContact = (contact) => {
+        ContactsAPI.create(contact).then((contact) =>
+            this.setState((currentState) => ({
+                contacts: currentState.contacts.concat([ contact ]),
+            })),
+        );
+    };
     render() {
+        const { contacts } = this.state;
         return (
             <div>
-                <ListContacts contacts={contacts} />
+                <Route
+                    exact
+                    path="/"
+                    component={() => <ListContacts contacts={contacts} removeContact={this.removeContact} />}
+                />
+                <Route
+                    path="/create"
+                    component={({ history }) => (
+                        <CreateContact
+                            onCreateContact={(contact) => {
+                                this.CreateContact(contact);
+                                history.push('/');
+                            }}
+                        />
+                    )}
+                />
             </div>
         );
     }
